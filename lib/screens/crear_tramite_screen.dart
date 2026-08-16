@@ -426,9 +426,11 @@ class _CrearTramiteScreenState extends State<CrearTramiteScreen> {
                               const SizedBox(height: 14),
 
                               if (_isLoadingRequisitos)
-                                const Center(
+                                const Padding(
                                   padding: EdgeInsets.symmetric(vertical: 20),
-                                  child: SpinKitThreeBounce(color: AppConstants.primaryBlue, size: 24),
+                                  child: Center(
+                                    child: SpinKitThreeBounce(color: AppConstants.primaryBlue, size: 24),
+                                  ),
                                 )
                               else if (_requisitos.isEmpty)
                                 Container(
