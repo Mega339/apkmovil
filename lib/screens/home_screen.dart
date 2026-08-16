@@ -5,6 +5,7 @@ import '../services/api_service.dart';
 import 'login_screen.dart';
 import 'crear_tramite_screen.dart';
 import 'mis_tramites_screen.dart';
+import 'buscar_tramite_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -227,13 +228,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         _buildMenuCard(
                           title: "Buscar Trámite",
-                          subtitle: "Por N° Expediente",
+                          subtitle: "Por N° Expediente o DNI",
                           icon: Icons.search_rounded,
                           color: AppConstants.warningOrange,
                           onTap: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => const MisTramitesScreen()),
+                              MaterialPageRoute(builder: (context) => const BuscarTramiteScreen()),
                             );
                           },
                         ),

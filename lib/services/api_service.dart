@@ -104,6 +104,21 @@ class ApiService {
     }
   }
 
+  // Buscar trámites en tiempo real por N° Expediente, DNI o palabra clave
+  static Future<Map<String, dynamic>> buscarTramites(String query) async {
+    final String encodedQuery = Uri.encodeComponent(query.trim());
+    final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.buscarTramiteAction}&query=$encodedQuery");
+    try {
+      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 12));
+      return _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-buscar-tramite-action.php' a tu hosting.");
+    } catch (e) {
+      return {
+        "status": "error",
+        "message": "Error al conectar con la búsqueda de trámites: $e"
+      };
+    }
+  }
+
   // Registrar un Nuevo Trámite desde la App Móvil con archivos adjuntos en Base64
   static Future<Map<String, dynamic>> crearTramite({
     required int solicitanteId,

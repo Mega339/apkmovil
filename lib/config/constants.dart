@@ -13,6 +13,7 @@ class AppConstants {
   static const String crearTramiteAction = "api-crear-tramite";
   static const String misTramitesAction = "api-mis-tramites";
   static const String tramiteDetalleAction = "api-tramite-detalle";
+  static const String buscarTramiteAction = "api-buscar-tramite";
 
   // Paleta de Colores Institucionales de Alta Estética
   static const Color primaryNavy = Color(0xFF1D2939);     // Azul Marino Profundo
