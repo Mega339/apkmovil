@@ -22,25 +22,7 @@ rootProject.buildDir = '../build'
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
 }
-subprojects {
-    project.evaluationDependsOn(':app')
-}
 
-// Configurar compileSdkVersion 36 en subproyectos al aplicar plugins Android sin invocar afterEvaluate
-subprojects {
-    project.plugins.withId('com.android.library') {
-        android {
-            compileSdkVersion 36
-        }
-    }
-    project.plugins.withId('com.android.application') {
-        android {
-            compileSdkVersion 36
-        }
-    }
-}
-
-// Forzar versiones estables de AndroidX totalmente compatibles con AGP 8.2.2
 subprojects {
     project.configurations.all {
         resolutionStrategy {
@@ -49,6 +31,10 @@ subprojects {
             force 'androidx.core:core-ktx:1.13.1'
         }
     }
+}
+
+subprojects {
+    project.evaluationDependsOn(':app')
 }
 
 tasks.register("clean", Delete) {
