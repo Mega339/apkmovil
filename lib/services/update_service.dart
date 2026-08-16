@@ -248,7 +248,7 @@ class _UpdateDialogWidgetState extends State<_UpdateDialogWidget> {
             const SizedBox(height: 6),
             Container(
               width: double.infinity,
-              maxHeight: 120,
+              constraints: const BoxConstraints(maxHeight: 120),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: AppConstants.bgLight,
