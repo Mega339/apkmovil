@@ -26,13 +26,16 @@ subprojects {
     project.evaluationDependsOn(':app')
 }
 
-// Forzar compileSdkVersion 36 en todos los subproyectos (elimina error android:attr/lStar de ota_update)
+// Configurar compileSdkVersion 36 en subproyectos al aplicar plugins Android sin invocar afterEvaluate
 subprojects {
-    afterEvaluate { project ->
-        if (project.hasProperty('android')) {
-            project.android {
-                compileSdkVersion 36
-            }
+    project.plugins.withId('com.android.library') {
+        android {
+            compileSdkVersion 36
+        }
+    }
+    project.plugins.withId('com.android.application') {
+        android {
+            compileSdkVersion 36
         }
     }
 }
