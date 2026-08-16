@@ -259,7 +259,7 @@ class _TramiteDetailScreenState extends State<TramiteDetailScreen> with SingleTi
               children: [
                 _buildInfoItem("Solicitante", _tramiteData?['solicitante_nombre'] ?? '-', Icons.person_outline),
                 const Divider(height: 24),
-                _buildInfoItem("Recepcionista", _tramiteData?['recepcionista_nombre'] ?? '-', Icons.admin_panel_settings_outlined),
+                _buildInfoItem("Recepcionista / Atendido por", _tramiteData?['recepcionista_nombre'] ?? '-', Icons.admin_panel_settings_outlined),
                 const Divider(height: 24),
                 _buildInfoItem("Asunto", _tramiteData?['asunto']?.isNotEmpty == true ? _tramiteData!['asunto'] : '(Sin asunto)', Icons.title),
                 const Divider(height: 24),
@@ -393,72 +393,210 @@ class _TramiteDetailScreenState extends State<TramiteDetailScreen> with SingleTi
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (_derivaciones.isNotEmpty) ...[
-            const Text(
-              "Historial de Derivaciones",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppConstants.textDark),
+            Row(
+              children: [
+                const Icon(Icons.alt_route, color: AppConstants.primaryNavy),
+                const SizedBox(width: 8),
+                Text(
+                  "Historial de Derivaciones (${_derivaciones.length})",
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppConstants.textDark),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             ListView.separated(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: _derivaciones.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              separatorBuilder: (_, __) => const SizedBox(height: 16),
               itemBuilder: (context, index) {
                 final d = _derivaciones[index];
-                final estadoColor = _getStatusColor(d['estado_nombre'] ?? '');
+                final estadoNombre = d['estado_nombre'] ?? '';
+                final estadoColor = _getStatusColor(estadoNombre);
+                final List<dynamic> archivosDeriva = d['archivos'] ?? [];
+                final List<dynamic> comentariosDeriva = d['comentarios'] ?? [];
 
                 return Container(
-                  padding: const EdgeInsets.all(14),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: AppConstants.cardWhite,
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: AppConstants.softShadow,
-                    border: Border.all(color: Colors.grey.shade200),
+                    border: Border.all(color: estadoColor.withOpacity(0.3), width: 1.5),
                   ),
-                  child: Row(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: estadoColor.withOpacity(0.12),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(Icons.business, color: estadoColor, size: 20),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              d['oficina_nombre'] ?? 'Oficina',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                      // Encabezado de la Derivación
+                      Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 14,
+                            backgroundColor: estadoColor,
+                            child: Text(
+                              "${index + 1}",
+                              style: const TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.bold),
                             ),
-                            if (d['programa_nombre']?.toString().isNotEmpty == true)
-                              Text(
-                                d['programa_nombre'],
-                                style: const TextStyle(fontSize: 12, color: AppConstants.primaryBlue),
-                              ),
-                            const SizedBox(height: 4),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              d['oficina_nombre'] ?? 'Oficina',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppConstants.textDark),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: estadoColor.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              estadoNombre,
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: estadoColor),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+
+                      if (d['programa_nombre']?.toString().isNotEmpty == true) ...[
+                        Row(
+                          children: [
+                            const Icon(Icons.school_outlined, size: 16, color: AppConstants.primaryBlue),
+                            const SizedBox(width: 6),
                             Text(
-                              "Fecha: ${d['fecha'] ?? '-'}",
-                              style: const TextStyle(fontSize: 12, color: AppConstants.textMuted),
+                              "Programa: ${d['programa_nombre']}",
+                              style: const TextStyle(fontSize: 13, color: AppConstants.primaryBlue, fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: estadoColor.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(6),
+                        const SizedBox(height: 6),
+                      ],
+
+                      // Enviado Por & Recibido Por
+                      if (d['enviado_por_nombre']?.toString().isNotEmpty == true || d['recibido_por_nombre']?.toString().isNotEmpty == true)
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppConstants.bgLight,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (d['enviado_por_nombre']?.toString().isNotEmpty == true)
+                                Text("Remitente: ${d['enviado_por_nombre']}", style: const TextStyle(fontSize: 12, color: AppConstants.textDark)),
+                              if (d['recibido_por_nombre']?.toString().isNotEmpty == true)
+                                Text("Destinatario / Atendido por: ${d['recibido_por_nombre']}", style: const TextStyle(fontSize: 12, color: AppConstants.textDark, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
                         ),
-                        child: Text(
-                          d['estado_nombre'] ?? '',
-                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: estadoColor),
-                        ),
+                      const SizedBox(height: 8),
+
+                      // Fecha
+                      Row(
+                        children: [
+                          const Icon(Icons.access_time, size: 14, color: AppConstants.textMuted),
+                          const SizedBox(width: 4),
+                          Text(
+                            "Fecha de derivación: ${d['fecha'] ?? '-'}",
+                            style: const TextStyle(fontSize: 12, color: AppConstants.textMuted),
+                          ),
+                        ],
                       ),
+
+                      // Archivos adjuntos en esta derivación
+                      if (archivosDeriva.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        const Text(
+                          "Archivos de esta etapa:",
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppConstants.primaryNavy),
+                        ),
+                        const SizedBox(height: 6),
+                        Column(
+                          children: archivosDeriva.map<Widget>((ad) {
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 6),
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: AppConstants.primaryBlue.withOpacity(0.06),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.insert_drive_file_outlined, size: 18, color: AppConstants.primaryBlue),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      ad['nombre_archivo'] ?? '',
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                                    ),
+                                  ),
+                                  InkWell(
+                                    onTap: () => _openFileUrl(ad['url']),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: AppConstants.primaryNavy,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: const Text("Ver", style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+
+                      // Comentarios / Observaciones en esta derivación
+                      if (comentariosDeriva.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        const Text(
+                          "Observaciones de la oficina:",
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppConstants.textDark),
+                        ),
+                        const SizedBox(height: 6),
+                        Column(
+                          children: comentariosDeriva.map<Widget>((cd) {
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 6),
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.amber.shade50,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.amber.shade200),
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Icon(Icons.comment_outlined, size: 16, color: Colors.brown),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          cd['usuario_nombre'] ?? 'Oficial',
+                                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.brown),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          cd['mensaje'] ?? '',
+                                          style: const TextStyle(fontSize: 12, color: AppConstants.textDark),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ],
                     ],
                   ),
                 );
@@ -467,9 +605,10 @@ class _TramiteDetailScreenState extends State<TramiteDetailScreen> with SingleTi
             const SizedBox(height: 24),
           ],
 
+          // Comentarios Generales si los hay fuera de derivaciones
           if (_comentarios.isNotEmpty) ...[
             const Text(
-              "Observaciones y Comentarios",
+              "Comentarios y Observaciones Generales",
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppConstants.textDark),
             ),
             const SizedBox(height: 12),
