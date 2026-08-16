@@ -12,9 +12,15 @@ class ApiService {
     try {
       return jsonDecode(body);
     } catch (_) {
+      String cleanText = body.replaceAll(RegExp(r'<[^>]*>'), ' ').replaceAll(RegExp(r'\s+'), ' ').trim();
+      if (cleanText.length > 200) {
+        cleanText = cleanText.substring(0, 200) + '...';
+      }
       return {
         "status": "error",
-        "message": defaultErrorMsg
+        "message": cleanText.isNotEmpty 
+            ? "Respuesta del servidor: $cleanText"
+            : defaultErrorMsg
       };
     }
   }
@@ -67,7 +73,7 @@ class ApiService {
     required int tipoTramiteId,
     String? asunto,
     String? descripcion,
-    Map<int, String>? archivosRequisitos, // Map de ID Requisito -> Ruta de archivo local
+    Map<int, String>? archivosRequisitos,
   }) async {
     final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.crearTramiteAction}");
 
