@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.9.22'
+    ext.kotlin_version = '2.0.21'
     repositories {
         google()
         mavenCentral()
@@ -24,6 +24,17 @@ subprojects {
 }
 subprojects {
     project.evaluationDependsOn(':app')
+}
+
+// Forzar compileSdkVersion 36 en todos los subproyectos (elimina error android:attr/lStar de ota_update)
+subprojects {
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            project.android {
+                compileSdkVersion 36
+            }
+        }
+    }
 }
 
 // Forzar versiones estables de AndroidX totalmente compatibles con AGP 8.2.2
