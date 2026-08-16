@@ -7,6 +7,20 @@ import '../models/user_model.dart';
 class ApiService {
   static const String _userKey = 'current_user_data';
 
+  // Obtener catálogos para los select (Tipos de Usuario, Oficinas, Programas de Estudio)
+  static Future<Map<String, dynamic>> getCatalogos() async {
+    final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.catalogosAction}");
+    try {
+      final response = await http.get(url).timeout(const Duration(seconds: 10));
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {
+        "status": "error",
+        "message": "Error al conectar con los catálogos del servidor: $e"
+      };
+    }
+  }
+
   // Inicio de sesión enviando usuario y contraseña al backend PHP
   static Future<Map<String, dynamic>> login(String usuario, String password) async {
     final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.loginAction}");
@@ -37,16 +51,19 @@ class ApiService {
     }
   }
 
-  // Registro de cuenta nueva desde la app móvil
+  // Registro de cuenta nueva desde la app móvil (alineado a usuario-view.php)
   static Future<Map<String, dynamic>> register({
     required String nombre,
     required String apellido,
     required String dni,
     required String correo,
+    required String telefono,
     required String usuario,
     required String password,
-    String? telefono,
-    int tipoUsuario = 3, // Estudiante por defecto
+    required int tipoUsuario,
+    String? sexo,
+    int? oficina,
+    int? programasEstudio,
   }) async {
     final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.registroAction}");
 
@@ -59,10 +76,13 @@ class ApiService {
           "apellido": apellido,
           "dni": dni,
           "correo": correo,
-          "telefono": telefono ?? "",
+          "telefono": telefono,
+          "sexo": sexo ?? "",
           "usuario": usuario,
           "password": password,
           "tipo_usuario": tipoUsuario,
+          "oficina": oficina,
+          "programas_estudio": programasEstudio,
         }),
       ).timeout(const Duration(seconds: 12));
 

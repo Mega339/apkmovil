@@ -8,6 +8,7 @@ class AppConstants {
   // Endpoints API
   static const String loginAction = "api-login";
   static const String registroAction = "api-registro";
+  static const String catalogosAction = "api-catalogos";
 
   // Paleta de Colores Institucionales de Alta Estética
   static const Color primaryNavy = Color(0xFF1D2939);     // Azul Marino Profundo
