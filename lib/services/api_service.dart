@@ -7,12 +7,24 @@ import '../models/user_model.dart';
 class ApiService {
   static const String _userKey = 'current_user_data';
 
+  // Helper para decodificar JSON de forma segura evitando FormatException por páginas HTML
+  static Map<String, dynamic> _safeJsonDecode(String body, String defaultErrorMsg) {
+    try {
+      return jsonDecode(body);
+    } catch (_) {
+      return {
+        "status": "error",
+        "message": defaultErrorMsg
+      };
+    }
+  }
+
   // Obtener catálogos para los select (Tipos de Usuario, Oficinas, Programas de Estudio)
   static Future<Map<String, dynamic>> getCatalogos() async {
     final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.catalogosAction}");
     try {
       final response = await http.get(url).timeout(const Duration(seconds: 10));
-      return jsonDecode(response.body);
+      return _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-catalogos-action.php' a tu hosting.");
     } catch (e) {
       return {
         "status": "error",
@@ -26,7 +38,7 @@ class ApiService {
     final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.tiposTramiteAction}");
     try {
       final response = await http.get(url).timeout(const Duration(seconds: 10));
-      return jsonDecode(response.body);
+      return _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-tipos-tramite-action.php' a tu hosting.");
     } catch (e) {
       return {
         "status": "error",
@@ -40,7 +52,7 @@ class ApiService {
     final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.tiposTramiteAction}&tipo_tramite_id=$tipoTramiteId");
     try {
       final response = await http.get(url).timeout(const Duration(seconds: 10));
-      return jsonDecode(response.body);
+      return _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-tipos-tramite-action.php' a tu hosting.");
     } catch (e) {
       return {
         "status": "error",
@@ -83,7 +95,10 @@ class ApiService {
       var streamedResponse = await request.send().timeout(const Duration(seconds: 30));
       var response = await http.Response.fromStream(streamedResponse);
 
-      return jsonDecode(response.body);
+      return _safeJsonDecode(
+        response.body, 
+        "Falta subir el archivo 'api-crear-tramite-action.php' a tu servidor web (sistramite.mallfers.com)."
+      );
     } catch (e) {
       return {
         "status": "error",
@@ -106,9 +121,12 @@ class ApiService {
         }),
       ).timeout(const Duration(seconds: 10));
 
-      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      final Map<String, dynamic> responseData = _safeJsonDecode(
+        response.body, 
+        "Falta subir 'api-login-action.php' o 'Database.php' a tu hosting web."
+      );
 
-      if (responseData['status'] == 'success') {
+      if (responseData['status'] == 'success' && responseData['data'] != null) {
         UserModel user = UserModel.fromJson(responseData['data']);
         await saveUserSession(user);
       }
@@ -157,7 +175,10 @@ class ApiService {
         }),
       ).timeout(const Duration(seconds: 12));
 
-      return jsonDecode(response.body);
+      return _safeJsonDecode(
+        response.body, 
+        "Falta subir el archivo 'api-registro-action.php' a tu servidor web."
+      );
     } catch (e) {
       return {
         "status": "error",
