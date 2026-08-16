@@ -76,6 +76,34 @@ class ApiService {
     }
   }
 
+  // Obtener la lista de Mis Trámites del usuario solicitante
+  static Future<Map<String, dynamic>> getMisTramites(int solicitanteId) async {
+    final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.misTramitesAction}&solicitante_id=$solicitanteId");
+    try {
+      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 12));
+      return _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-mis-tramites-action.php' a tu hosting.");
+    } catch (e) {
+      return {
+        "status": "error",
+        "message": "Error al conectar para obtener mis trámites: $e"
+      };
+    }
+  }
+
+  // Obtener el detalle completo de un trámite (Información, Archivos, Derivaciones, Comentarios)
+  static Future<Map<String, dynamic>> getTramiteDetalle(int tramiteId) async {
+    final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.tramiteDetalleAction}&tramite_id=$tramiteId");
+    try {
+      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 12));
+      return _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-tramite-detalle-action.php' a tu hosting.");
+    } catch (e) {
+      return {
+        "status": "error",
+        "message": "Error al obtener el detalle del trámite: $e"
+      };
+    }
+  }
+
   // Registrar un Nuevo Trámite desde la App Móvil con archivos adjuntos en Base64
   static Future<Map<String, dynamic>> crearTramite({
     required int solicitanteId,

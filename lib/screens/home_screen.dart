@@ -4,6 +4,7 @@ import '../models/user_model.dart';
 import '../services/api_service.dart';
 import 'login_screen.dart';
 import 'crear_tramite_screen.dart';
+import 'mis_tramites_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -206,8 +207,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           icon: Icons.folder_copy_outlined,
                           color: AppConstants.primaryBlue,
                           onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text("Módulo de Mis Trámites seleccionado.")),
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const MisTramitesScreen()),
                             );
                           },
                         ),
@@ -229,8 +231,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           icon: Icons.search_rounded,
                           color: AppConstants.warningOrange,
                           onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text("Módulo de Búsqueda de Trámite seleccionado.")),
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const MisTramitesScreen()),
                             );
                           },
                         ),
