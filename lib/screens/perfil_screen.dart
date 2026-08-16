@@ -3,6 +3,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../config/constants.dart';
 import '../models/user_model.dart';
 import '../services/api_service.dart';
+import '../services/update_service.dart';
 import 'login_screen.dart';
 
 class PerfilScreen extends StatefulWidget {
@@ -705,6 +706,56 @@ class _PerfilScreenState extends State<PerfilScreen> with SingleTickerProviderSt
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppConstants.primaryNavy,
                       foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Tarjeta de Comprobar Actualizaciones OTA
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: AppConstants.cardWhite,
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: AppConstants.softShadow,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.system_update_rounded, color: AppConstants.primaryBlue),
+                    SizedBox(width: 8),
+                    Text(
+                      "Actualizaciones del Sistema",
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppConstants.textDark),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  "Comprueba si existe una versión más reciente del APK en el servidor para actualizar automáticamente.",
+                  style: TextStyle(fontSize: 12, color: AppConstants.textMuted),
+                ),
+                const SizedBox(height: 14),
+                SizedBox(
+                  width: double.infinity,
+                  height: 46,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      UpdateService.checkAndShowUpdateDialog(context, showNoUpdateToast: true);
+                    },
+                    icon: const Icon(Icons.refresh_rounded, color: AppConstants.primaryNavy),
+                    label: const Text(
+                      "Buscar Actualizaciones del APK",
+                      style: TextStyle(color: AppConstants.primaryNavy, fontWeight: FontWeight.bold),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: AppConstants.primaryNavy),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                   ),

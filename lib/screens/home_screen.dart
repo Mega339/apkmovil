@@ -7,6 +7,7 @@ import 'crear_tramite_screen.dart';
 import 'mis_tramites_screen.dart';
 import 'buscar_tramite_screen.dart';
 import 'perfil_screen.dart';
+import '../services/update_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -23,6 +24,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadUserData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      UpdateService.checkAndShowUpdateDialog(context);
+    });
   }
 
   void _loadUserData() async {

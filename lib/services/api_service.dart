@@ -34,6 +34,20 @@ class ApiService {
     }
   }
 
+  // Comprobar si existe una versión más reciente del APK móvil en el servidor
+  static Future<Map<String, dynamic>> checkAppVersion() async {
+    final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.versionCheckAction}");
+    try {
+      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 10));
+      return _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-version-check-action.php' a tu hosting.");
+    } catch (e) {
+      return {
+        "status": "error",
+        "message": "Error al verificar la versión del APK: $e"
+      };
+    }
+  }
+
   // Obtener catálogos para los select (Tipos de Usuario, Oficinas, Programas de Estudio)
   static Future<Map<String, dynamic>> getCatalogos() async {
     final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.catalogosAction}");
