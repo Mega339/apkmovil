@@ -1,14 +1,17 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:file_picker/file_picker.dart';
 import '../config/constants.dart';
 import '../models/user_model.dart';
 
 class ApiService {
   static const String _userKey = 'current_user_data';
 
-  // Cabeceras HTTP estándar para evitar bloqueos ModSecurity / WAF (406 Not Acceptable)
+  // Cabeceras HTTP estándar para evitar bloqueos ModSecurity / WAF
   static final Map<String, String> _headers = {
+    "Content-Type": "application/json; charset=UTF-8",
     "Accept": "application/json",
     "User-Agent": "Mozilla/5.0 (Linux; Android 10; Mobile) MobileApp/1.0",
   };
@@ -73,43 +76,54 @@ class ApiService {
     }
   }
 
-  // Registrar un Nuevo Trámite desde la App Móvil con archivos adjuntos
+  // Registrar un Nuevo Trámite desde la App Móvil con archivos adjuntos en Base64
   static Future<Map<String, dynamic>> crearTramite({
     required int solicitanteId,
     required int tipoTramiteId,
     String? asunto,
     String? descripcion,
-    Map<int, String>? archivosRequisitos,
+    Map<int, PlatformFile>? archivosRequisitos,
   }) async {
     final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.crearTramiteAction}");
 
     try {
-      var request = http.MultipartRequest('POST', url);
+      List<Map<String, dynamic>> listArchivos = [];
       
-      // Agregar cabeceras para evitar error 406 Not Acceptable de ModSecurity / cPanel
-      request.headers.addAll(_headers);
-
-      request.fields['solicitante'] = solicitanteId.toString();
-      request.fields['tipo_tramite'] = tipoTramiteId.toString();
-      request.fields['recepcionista'] = '1';
-      if (asunto != null && asunto.isNotEmpty) request.fields['asunto'] = asunto;
-      if (descripcion != null && descripcion.isNotEmpty) request.fields['descripcion'] = descripcion;
-
-      // Adjuntar archivos de requisitos
       if (archivosRequisitos != null) {
         for (var entry in archivosRequisitos.entries) {
           int reqId = entry.key;
-          String path = entry.value;
-          if (path.isNotEmpty) {
-            request.files.add(
-              await http.MultipartFile.fromPath("archivo_requisito_$reqId", path)
-            );
+          PlatformFile pFile = entry.value;
+
+          List<int>? bytes;
+          if (pFile.bytes != null) {
+            bytes = pFile.bytes;
+          } else if (pFile.path != null && pFile.path!.isNotEmpty) {
+            bytes = await File(pFile.path!).readAsBytes();
+          }
+
+          if (bytes != null && bytes.isNotEmpty) {
+            String b64 = base64Encode(bytes);
+            listArchivos.add({
+              "requisito_id": reqId,
+              "nombre": pFile.name,
+              "base64": b64
+            });
           }
         }
       }
 
-      var streamedResponse = await request.send().timeout(const Duration(seconds: 30));
-      var response = await http.Response.fromStream(streamedResponse);
+      final response = await http.post(
+        url,
+        headers: _headers,
+        body: jsonEncode({
+          "solicitante": solicitanteId,
+          "tipo_tramite": tipoTramiteId,
+          "recepcionista": 1,
+          "asunto": asunto ?? "",
+          "descripcion": descripcion ?? "",
+          "archivos_requisitos": listArchivos
+        }),
+      ).timeout(const Duration(seconds: 35));
 
       return _safeJsonDecode(
         response.body, 
@@ -130,10 +144,7 @@ class ApiService {
     try {
       final response = await http.post(
         url,
-        headers: {
-          ..._headers,
-          "Content-Type": "application/json; charset=UTF-8"
-        },
+        headers: _headers,
         body: jsonEncode({
           "usuario": usuario,
           "password": password,
@@ -178,10 +189,7 @@ class ApiService {
     try {
       final response = await http.post(
         url,
-        headers: {
-          ..._headers,
-          "Content-Type": "application/json; charset=UTF-8"
-        },
+        headers: _headers,
         body: jsonEncode({
           "nombre": nombre,
           "apellido": apellido,

@@ -152,20 +152,12 @@ class _CrearTramiteScreenState extends State<CrearTramiteScreen> {
 
     setState(() => _isSubmitting = true);
 
-    // Preparar el mapa de rutas de archivos
-    Map<int, String> reqFilesMap = {};
-    _selectedFiles.forEach((reqId, pFile) {
-      if (pFile.path != null) {
-        reqFilesMap[reqId] = pFile.path!;
-      }
-    });
-
     final res = await ApiService.crearTramite(
       solicitanteId: _currentUser!.id,
       tipoTramiteId: _selectedTipoTramite!,
       asunto: _asuntoController.text.trim(),
       descripcion: _descripcionController.text.trim(),
-      archivosRequisitos: reqFilesMap,
+      archivosRequisitos: _selectedFiles,
     );
 
     setState(() => _isSubmitting = false);
