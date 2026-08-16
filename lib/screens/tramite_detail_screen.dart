@@ -76,18 +76,31 @@ class _TramiteDetailScreenState extends State<TramiteDetailScreen> with SingleTi
   }
 
   void _openFileUrl(String urlString) async {
+    if (urlString.isEmpty) return;
     final Uri url = Uri.parse(urlString);
     try {
-      if (await canLaunchUrl(url)) {
-        await launchUrl(url, mode: LaunchMode.externalApplication);
-      } else {
+      bool launched = await launchUrl(
+        url,
+        mode: LaunchMode.externalApplication,
+      );
+
+      if (!launched) {
+        launched = await launchUrl(
+          url,
+          mode: LaunchMode.platformDefault,
+        );
+      }
+
+      if (!launched) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("No se pudo abrir el archivo: $urlString")),
+          SnackBar(content: Text("No se pudo abrir el navegador para: $urlString")),
         );
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error al abrir archivo: $e")),
+        SnackBar(content: Text("Error al abrir el archivo: $e")),
       );
     }
   }
