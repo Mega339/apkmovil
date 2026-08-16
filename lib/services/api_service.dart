@@ -7,7 +7,13 @@ import '../models/user_model.dart';
 class ApiService {
   static const String _userKey = 'current_user_data';
 
-  // Helper para decodificar JSON de forma segura evitando FormatException por páginas HTML
+  // Cabeceras HTTP estándar para evitar bloqueos ModSecurity / WAF (406 Not Acceptable)
+  static final Map<String, String> _headers = {
+    "Accept": "application/json",
+    "User-Agent": "Mozilla/5.0 (Linux; Android 10; Mobile) MobileApp/1.0",
+  };
+
+  // Helper para decodificar JSON de forma segura evitando FormatException por páginas HTML o WAF
   static Map<String, dynamic> _safeJsonDecode(String body, String defaultErrorMsg) {
     try {
       return jsonDecode(body);
@@ -29,7 +35,7 @@ class ApiService {
   static Future<Map<String, dynamic>> getCatalogos() async {
     final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.catalogosAction}");
     try {
-      final response = await http.get(url).timeout(const Duration(seconds: 10));
+      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 10));
       return _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-catalogos-action.php' a tu hosting.");
     } catch (e) {
       return {
@@ -43,7 +49,7 @@ class ApiService {
   static Future<Map<String, dynamic>> getTiposTramite() async {
     final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.tiposTramiteAction}");
     try {
-      final response = await http.get(url).timeout(const Duration(seconds: 10));
+      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 10));
       return _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-tipos-tramite-action.php' a tu hosting.");
     } catch (e) {
       return {
@@ -57,7 +63,7 @@ class ApiService {
   static Future<Map<String, dynamic>> getRequisitosPorTipo(int tipoTramiteId) async {
     final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.tiposTramiteAction}&tipo_tramite_id=$tipoTramiteId");
     try {
-      final response = await http.get(url).timeout(const Duration(seconds: 10));
+      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 10));
       return _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-tipos-tramite-action.php' a tu hosting.");
     } catch (e) {
       return {
@@ -79,6 +85,10 @@ class ApiService {
 
     try {
       var request = http.MultipartRequest('POST', url);
+      
+      // Agregar cabeceras para evitar error 406 Not Acceptable de ModSecurity / cPanel
+      request.headers.addAll(_headers);
+
       request.fields['solicitante'] = solicitanteId.toString();
       request.fields['tipo_tramite'] = tipoTramiteId.toString();
       request.fields['recepcionista'] = '1';
@@ -120,7 +130,10 @@ class ApiService {
     try {
       final response = await http.post(
         url,
-        headers: {"Content-Type": "application/json; charset=UTF-8"},
+        headers: {
+          ..._headers,
+          "Content-Type": "application/json; charset=UTF-8"
+        },
         body: jsonEncode({
           "usuario": usuario,
           "password": password,
@@ -165,7 +178,10 @@ class ApiService {
     try {
       final response = await http.post(
         url,
-        headers: {"Content-Type": "application/json; charset=UTF-8"},
+        headers: {
+          ..._headers,
+          "Content-Type": "application/json; charset=UTF-8"
+        },
         body: jsonEncode({
           "nombre": nombre,
           "apellido": apellido,
