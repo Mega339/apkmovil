@@ -21,6 +21,77 @@ class ApiService {
     }
   }
 
+  // Obtener tipos de trámites disponibles y siguiente número de expediente
+  static Future<Map<String, dynamic>> getTiposTramite() async {
+    final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.tiposTramiteAction}");
+    try {
+      final response = await http.get(url).timeout(const Duration(seconds: 10));
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {
+        "status": "error",
+        "message": "Error al conectar con los tipos de trámites: $e"
+      };
+    }
+  }
+
+  // Obtener requisitos específicos de un Tipo de Trámite
+  static Future<Map<String, dynamic>> getRequisitosPorTipo(int tipoTramiteId) async {
+    final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.tiposTramiteAction}&tipo_tramite_id=$tipoTramiteId");
+    try {
+      final response = await http.get(url).timeout(const Duration(seconds: 10));
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {
+        "status": "error",
+        "message": "Error al obtener requisitos del trámite: $e"
+      };
+    }
+  }
+
+  // Registrar un Nuevo Trámite desde la App Móvil con archivos adjuntos
+  static Future<Map<String, dynamic>> crearTramite({
+    required int solicitanteId,
+    required int tipoTramiteId,
+    String? asunto,
+    String? descripcion,
+    Map<int, String>? archivosRequisitos, // Map de ID Requisito -> Ruta de archivo local
+  }) async {
+    final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.crearTramiteAction}");
+
+    try {
+      var request = http.MultipartRequest('POST', url);
+      request.fields['solicitante'] = solicitanteId.toString();
+      request.fields['tipo_tramite'] = tipoTramiteId.toString();
+      request.fields['recepcionista'] = '1';
+      if (asunto != null && asunto.isNotEmpty) request.fields['asunto'] = asunto;
+      if (descripcion != null && descripcion.isNotEmpty) request.fields['descripcion'] = descripcion;
+
+      // Adjuntar archivos de requisitos
+      if (archivosRequisitos != null) {
+        for (var entry in archivosRequisitos.entries) {
+          int reqId = entry.key;
+          String path = entry.value;
+          if (path.isNotEmpty) {
+            request.files.add(
+              await http.MultipartFile.fromPath("archivo_requisito_$reqId", path)
+            );
+          }
+        }
+      }
+
+      var streamedResponse = await request.send().timeout(const Duration(seconds: 30));
+      var response = await http.Response.fromStream(streamedResponse);
+
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {
+        "status": "error",
+        "message": "Error al enviar el nuevo trámite: $e"
+      };
+    }
+  }
+
   // Inicio de sesión enviando usuario y contraseña al backend PHP
   static Future<Map<String, dynamic>> login(String usuario, String password) async {
     final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.loginAction}");

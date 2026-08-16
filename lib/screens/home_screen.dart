@@ -3,6 +3,7 @@ import '../config/constants.dart';
 import '../models/user_model.dart';
 import '../services/api_service.dart';
 import 'login_screen.dart';
+import 'crear_tramite_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -216,8 +217,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           icon: Icons.note_add_outlined,
                           color: AppConstants.successGreen,
                           onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text("Módulo de Registro de Trámite seleccionado.")),
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const CrearTramiteScreen()),
                             );
                           },
                         ),
