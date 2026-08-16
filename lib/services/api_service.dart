@@ -119,6 +119,87 @@ class ApiService {
     }
   }
 
+  // Obtener perfil completo y estadísticas del usuario
+  static Future<Map<String, dynamic>> getPerfil(int usuarioId) async {
+    final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.perfilAction}&accion=obtener&usuario_id=$usuarioId");
+    try {
+      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 10));
+      return _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-perfil-action.php' a tu hosting.");
+    } catch (e) {
+      return {
+        "status": "error",
+        "message": "Error al obtener perfil del servidor: $e"
+      };
+    }
+  }
+
+  // Actualizar información personal del usuario
+  static Future<Map<String, dynamic>> actualizarPerfil({
+    required int usuarioId,
+    required String nombre,
+    required String apellido,
+    required String correo,
+    required String telefono,
+    required String sexo,
+  }) async {
+    final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.perfilAction}");
+    try {
+      final response = await http.post(
+        url,
+        headers: _headers,
+        body: jsonEncode({
+          "accion": "actualizar_perfil",
+          "usuario_id": usuarioId,
+          "nombre": nombre,
+          "apellido": apellido,
+          "correo": correo,
+          "telefono": telefono,
+          "sexo": sexo,
+        }),
+      ).timeout(const Duration(seconds: 12));
+
+      final resData = _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-perfil-action.php' a tu hosting.");
+      if (resData['status'] == 'success' && resData['data'] != null) {
+        UserModel user = UserModel.fromJson(resData['data']);
+        await saveUserSession(user);
+      }
+      return resData;
+    } catch (e) {
+      return {
+        "status": "error",
+        "message": "Error de comunicación al actualizar perfil: $e"
+      };
+    }
+  }
+
+  // Cambiar contraseña del usuario
+  static Future<Map<String, dynamic>> cambiarPassword({
+    required int usuarioId,
+    required String passwordActual,
+    required String passwordNueva,
+  }) async {
+    final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.perfilAction}");
+    try {
+      final response = await http.post(
+        url,
+        headers: _headers,
+        body: jsonEncode({
+          "accion": "cambiar_password",
+          "usuario_id": usuarioId,
+          "password_actual": passwordActual,
+          "password_nueva": passwordNueva,
+        }),
+      ).timeout(const Duration(seconds: 12));
+
+      return _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-perfil-action.php' a tu hosting.");
+    } catch (e) {
+      return {
+        "status": "error",
+        "message": "Error al conectar para cambiar contraseña: $e"
+      };
+    }
+  }
+
   // Registrar un Nuevo Trámite desde la App Móvil con archivos adjuntos en Base64
   static Future<Map<String, dynamic>> crearTramite({
     required int solicitanteId,

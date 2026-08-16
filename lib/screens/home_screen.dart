@@ -6,6 +6,7 @@ import 'login_screen.dart';
 import 'crear_tramite_screen.dart';
 import 'mis_tramites_screen.dart';
 import 'buscar_tramite_screen.dart';
+import 'perfil_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -99,85 +100,99 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Tarjeta de Bienvenida al Usuario
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [AppConstants.primaryNavy, Color(0xFF2C3E50)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
+                    // Tarjeta de Bienvenida al Usuario (Interactivamente abre Mi Perfil)
+                    Material(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(20),
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const PerfilScreen()),
+                          ).then((_) => _loadUserData());
+                        },
                         borderRadius: BorderRadius.circular(20),
-                        boxShadow: AppConstants.softShadow,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [AppConstants.primaryNavy, Color(0xFF2C3E50)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: AppConstants.softShadow,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              CircleAvatar(
-                                radius: 26,
-                                backgroundColor: AppConstants.primaryBlue,
-                                child: Text(
-                                  _currentUser?.nombre.isNotEmpty == true 
-                                      ? _currentUser!.nombre[0].toUpperCase() 
-                                      : 'U',
-                                  style: const TextStyle(fontSize: 22, color: Colors.white, fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "¡Hola, ${_currentUser?.nombre ?? 'Usuario'}!",
-                                      style: const TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 26,
+                                    backgroundColor: AppConstants.primaryBlue,
+                                    child: Text(
+                                      _currentUser?.nombre.isNotEmpty == true 
+                                          ? _currentUser!.nombre[0].toUpperCase() 
+                                          : 'U',
+                                      style: const TextStyle(fontSize: 22, color: Colors.white, fontWeight: FontWeight.bold),
                                     ),
-                                    const SizedBox(height: 2),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                      decoration: BoxDecoration(
-                                        color: AppConstants.accentCyan.withOpacity(0.25),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Text(
-                                        _currentUser?.tipoUsuarioNombre ?? 'Solicitante',
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          color: AppConstants.accentCyan,
-                                          fontWeight: FontWeight.w600,
+                                  ),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "¡Hola, ${_currentUser?.nombre ?? 'Usuario'}!",
+                                          style: const TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
                                         ),
-                                      ),
+                                        const SizedBox(height: 2),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                          decoration: BoxDecoration(
+                                            color: AppConstants.accentCyan.withOpacity(0.25),
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: Text(
+                                            _currentUser?.tipoUsuarioNombre ?? 'Solicitante',
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              color: AppConstants.accentCyan,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                  const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white70, size: 16),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              const Divider(color: Colors.white24, height: 1),
+                              const SizedBox(height: 12),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "DNI: ${_currentUser?.dni ?? '-'}",
+                                    style: const TextStyle(color: Colors.white70, fontSize: 13),
+                                  ),
+                                  Text(
+                                    "CÓDIGO: ${_currentUser?.codigo ?? '-'}",
+                                    style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                          const SizedBox(height: 16),
-                          const Divider(color: Colors.white24, height: 1),
-                          const SizedBox(height: 12),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "DNI: ${_currentUser?.dni ?? '-'}",
-                                style: const TextStyle(color: Colors.white70, fontSize: 13),
-                              ),
-                              Text(
-                                "CÓDIGO: ${_currentUser?.codigo ?? '-'}",
-                                style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -244,9 +259,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           icon: Icons.account_circle_outlined,
                           color: AppConstants.primaryNavy,
                           onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text("Módulo Perfil seleccionado.")),
-                            );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const PerfilScreen()),
+                            ).then((_) => _loadUserData());
                           },
                         ),
                       ],
