@@ -34,11 +34,11 @@ class ApiService {
     }
   }
 
-  // Comprobar si existe una versión más reciente del APK móvil en el servidor
+  // Comprobar si existe una versión más reciente del APK móvil en el servidor (Timeout ultra-corto de 3s no bloqueante)
   static Future<Map<String, dynamic>> checkAppVersion() async {
     final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.versionCheckAction}");
     try {
-      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 10));
+      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 3));
       return _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-version-check-action.php' a tu hosting.");
     } catch (e) {
       return {
@@ -52,7 +52,7 @@ class ApiService {
   static Future<Map<String, dynamic>> getCatalogos() async {
     final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.catalogosAction}");
     try {
-      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 10));
+      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 20));
       return _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-catalogos-action.php' a tu hosting.");
     } catch (e) {
       return {
@@ -66,7 +66,7 @@ class ApiService {
   static Future<Map<String, dynamic>> getTiposTramite() async {
     final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.tiposTramiteAction}");
     try {
-      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 10));
+      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 20));
       return _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-tipos-tramite-action.php' a tu hosting.");
     } catch (e) {
       return {
@@ -80,7 +80,7 @@ class ApiService {
   static Future<Map<String, dynamic>> getRequisitosPorTipo(int tipoTramiteId) async {
     final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.tiposTramiteAction}&tipo_tramite_id=$tipoTramiteId");
     try {
-      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 10));
+      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 20));
       return _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-tipos-tramite-action.php' a tu hosting.");
     } catch (e) {
       return {
@@ -94,7 +94,7 @@ class ApiService {
   static Future<Map<String, dynamic>> getMisTramites(int solicitanteId) async {
     final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.misTramitesAction}&solicitante_id=$solicitanteId");
     try {
-      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 12));
+      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 20));
       return _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-mis-tramites-action.php' a tu hosting.");
     } catch (e) {
       return {
@@ -108,7 +108,7 @@ class ApiService {
   static Future<Map<String, dynamic>> getTramiteDetalle(int tramiteId) async {
     final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.tramiteDetalleAction}&tramite_id=$tramiteId");
     try {
-      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 12));
+      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 20));
       return _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-tramite-detalle-action.php' a tu hosting.");
     } catch (e) {
       return {
@@ -123,7 +123,7 @@ class ApiService {
     final String encodedQuery = Uri.encodeComponent(query.trim());
     final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.buscarTramiteAction}&query=$encodedQuery");
     try {
-      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 12));
+      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 20));
       return _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-buscar-tramite-action.php' a tu hosting.");
     } catch (e) {
       return {
@@ -137,7 +137,7 @@ class ApiService {
   static Future<Map<String, dynamic>> getPerfil(int usuarioId) async {
     final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.perfilAction}&accion=obtener&usuario_id=$usuarioId");
     try {
-      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 10));
+      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 20));
       return _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-perfil-action.php' a tu hosting.");
     } catch (e) {
       return {
@@ -170,7 +170,7 @@ class ApiService {
           "telefono": telefono,
           "sexo": sexo,
         }),
-      ).timeout(const Duration(seconds: 12));
+      ).timeout(const Duration(seconds: 20));
 
       final resData = _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-perfil-action.php' a tu hosting.");
       if (resData['status'] == 'success' && resData['data'] != null) {
@@ -203,7 +203,7 @@ class ApiService {
           "password_actual": passwordActual,
           "password_nueva": passwordNueva,
         }),
-      ).timeout(const Duration(seconds: 12));
+      ).timeout(const Duration(seconds: 20));
 
       return _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-perfil-action.php' a tu hosting.");
     } catch (e) {
@@ -261,7 +261,7 @@ class ApiService {
           "descripcion": descripcion ?? "",
           "archivos_requisitos": listArchivos
         }),
-      ).timeout(const Duration(seconds: 35));
+      ).timeout(const Duration(seconds: 45));
 
       return _safeJsonDecode(
         response.body, 
@@ -275,7 +275,7 @@ class ApiService {
     }
   }
 
-  // Inicio de sesión enviando usuario y contraseña al backend PHP
+  // Inicio de sesión enviando usuario, DNI o correo y contraseña al backend PHP
   static Future<Map<String, dynamic>> login(String usuario, String password) async {
     final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.loginAction}");
 
@@ -284,10 +284,10 @@ class ApiService {
         url,
         headers: _headers,
         body: jsonEncode({
-          "usuario": usuario,
+          "usuario": usuario.trim(),
           "password": password,
         }),
-      ).timeout(const Duration(seconds: 10));
+      ).timeout(const Duration(seconds: 20));
 
       final Map<String, dynamic> responseData = _safeJsonDecode(
         response.body, 
@@ -341,7 +341,7 @@ class ApiService {
           "oficina": oficina,
           "programas_estudio": programasEstudio,
         }),
-      ).timeout(const Duration(seconds: 12));
+      ).timeout(const Duration(seconds: 20));
 
       return _safeJsonDecode(
         response.body, 
