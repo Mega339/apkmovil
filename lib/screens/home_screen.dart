@@ -24,9 +24,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadUserData();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      UpdateService.checkAndShowUpdateDialog(context);
-    });
   }
 
   void _loadUserData() async {

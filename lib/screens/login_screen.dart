@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../config/constants.dart';
 import '../services/api_service.dart';
+import '../services/update_service.dart';
 import 'register_screen.dart';
 import 'home_screen.dart';
 
@@ -19,6 +20,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool _obscurePassword = true;
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      UpdateService.checkAndShowUpdateDialog(context);
+    });
+  }
 
   @override
   void dispose() {
