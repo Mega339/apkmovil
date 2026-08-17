@@ -303,7 +303,7 @@ class ApiService {
     } catch (e) {
       return {
         "status": "error",
-        "message": "Error de conexión con el servidor. Verifica tu conexión a internet o el servidor backend."
+        "message": "Error de comunicación con el servidor ($e). Verifica tu conexión a internet o el backend."
       };
     }
   }
