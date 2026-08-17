@@ -106,22 +106,14 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Encabezado e Isotipo Institucional
-                Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    color: AppConstants.primaryNavy,
-                    shape: BoxShape.circle,
-                    boxShadow: AppConstants.softShadow,
-                  ),
-                  child: const Icon(
-                    Icons.assignment_ind_rounded,
-                    size: 48,
-                    color: Colors.white,
-                  ),
+                Image.asset(
+                  'imagen/logo.png',
+                  height: 120,
+                  fit: BoxFit.contain,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
                 const Text(
-                  "CONTICOMTC",
+                  "SIS TRÁMITE",
                   style: TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.bold,

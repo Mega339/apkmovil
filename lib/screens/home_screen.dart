@@ -74,11 +74,11 @@ class _HomeScreenState extends State<HomeScreen> {
         foregroundColor: Colors.white,
         elevation: 0,
         title: Row(
-          children: const [
-            Icon(Icons.assignment_turned_in, size: 26, color: AppConstants.accentCyan),
-            SizedBox(width: 10),
-            Text(
-              "CONTICOMTC Móvil",
+          children: [
+            Image.asset('imagen/logo.png', height: 32, fit: BoxFit.contain),
+            const SizedBox(width: 10),
+            const Text(
+              "SIS TRÁMITE",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
           ],

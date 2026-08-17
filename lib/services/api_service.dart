@@ -8,6 +8,7 @@ import '../models/user_model.dart';
 
 class ApiService {
   static const String _userKey = 'current_user_data';
+  static UserModel? _cachedUser;
 
   // Cabeceras HTTP estándar para evitar bloqueos ModSecurity / WAF
   static final Map<String, String> _headers = {
@@ -52,7 +53,7 @@ class ApiService {
   static Future<Map<String, dynamic>> getCatalogos() async {
     final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.catalogosAction}");
     try {
-      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 20));
+      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 15));
       return _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-catalogos-action.php' a tu hosting.");
     } catch (e) {
       return {
@@ -66,7 +67,7 @@ class ApiService {
   static Future<Map<String, dynamic>> getTiposTramite() async {
     final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.tiposTramiteAction}");
     try {
-      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 20));
+      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 15));
       return _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-tipos-tramite-action.php' a tu hosting.");
     } catch (e) {
       return {
@@ -80,7 +81,7 @@ class ApiService {
   static Future<Map<String, dynamic>> getRequisitosPorTipo(int tipoTramiteId) async {
     final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.tiposTramiteAction}&tipo_tramite_id=$tipoTramiteId");
     try {
-      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 20));
+      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 15));
       return _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-tipos-tramite-action.php' a tu hosting.");
     } catch (e) {
       return {
@@ -94,7 +95,7 @@ class ApiService {
   static Future<Map<String, dynamic>> getMisTramites(int solicitanteId) async {
     final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.misTramitesAction}&solicitante_id=$solicitanteId");
     try {
-      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 20));
+      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 15));
       return _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-mis-tramites-action.php' a tu hosting.");
     } catch (e) {
       return {
@@ -108,7 +109,7 @@ class ApiService {
   static Future<Map<String, dynamic>> getTramiteDetalle(int tramiteId) async {
     final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.tramiteDetalleAction}&tramite_id=$tramiteId");
     try {
-      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 20));
+      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 15));
       return _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-tramite-detalle-action.php' a tu hosting.");
     } catch (e) {
       return {
@@ -118,12 +119,16 @@ class ApiService {
     }
   }
 
-  // Buscar trámites en tiempo real por N° Expediente, DNI o palabra clave
-  static Future<Map<String, dynamic>> buscarTramites(String query) async {
+  // Buscar trámites en tiempo real por N° Expediente, DNI o palabra clave (filtrado por solicitante)
+  static Future<Map<String, dynamic>> buscarTramites(String query, {int? solicitanteId}) async {
     final String encodedQuery = Uri.encodeComponent(query.trim());
-    final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.buscarTramiteAction}&query=$encodedQuery");
+    String urlStr = "${AppConstants.baseUrl}?action=${AppConstants.buscarTramiteAction}&query=$encodedQuery";
+    if (solicitanteId != null && solicitanteId > 0) {
+      urlStr += "&solicitante_id=$solicitanteId";
+    }
+    final Uri url = Uri.parse(urlStr);
     try {
-      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 20));
+      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 15));
       return _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-buscar-tramite-action.php' a tu hosting.");
     } catch (e) {
       return {
@@ -137,7 +142,7 @@ class ApiService {
   static Future<Map<String, dynamic>> getPerfil(int usuarioId) async {
     final Uri url = Uri.parse("${AppConstants.baseUrl}?action=${AppConstants.perfilAction}&accion=obtener&usuario_id=$usuarioId");
     try {
-      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 20));
+      final response = await http.get(url, headers: _headers).timeout(const Duration(seconds: 15));
       return _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-perfil-action.php' a tu hosting.");
     } catch (e) {
       return {
@@ -170,7 +175,7 @@ class ApiService {
           "telefono": telefono,
           "sexo": sexo,
         }),
-      ).timeout(const Duration(seconds: 20));
+      ).timeout(const Duration(seconds: 15));
 
       final resData = _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-perfil-action.php' a tu hosting.");
       if (resData['status'] == 'success' && resData['data'] != null) {
@@ -203,7 +208,7 @@ class ApiService {
           "password_actual": passwordActual,
           "password_nueva": passwordNueva,
         }),
-      ).timeout(const Duration(seconds: 20));
+      ).timeout(const Duration(seconds: 15));
 
       return _safeJsonDecode(response.body, "Asegúrate de haber subido 'api-perfil-action.php' a tu hosting.");
     } catch (e) {
@@ -261,7 +266,7 @@ class ApiService {
           "descripcion": descripcion ?? "",
           "archivos_requisitos": listArchivos
         }),
-      ).timeout(const Duration(seconds: 45));
+      ).timeout(const Duration(seconds: 40));
 
       return _safeJsonDecode(
         response.body, 
@@ -287,7 +292,7 @@ class ApiService {
           "usuario": usuario.trim(),
           "password": password,
         }),
-      ).timeout(const Duration(seconds: 20));
+      ).timeout(const Duration(seconds: 15));
 
       final Map<String, dynamic> responseData = _safeJsonDecode(
         response.body, 
@@ -341,7 +346,7 @@ class ApiService {
           "oficina": oficina,
           "programas_estudio": programasEstudio,
         }),
-      ).timeout(const Duration(seconds: 20));
+      ).timeout(const Duration(seconds: 15));
 
       return _safeJsonDecode(
         response.body, 
@@ -355,19 +360,24 @@ class ApiService {
     }
   }
 
-  // Guardar datos del usuario en sesión local (SharedPreferences)
+  // Guardar datos del usuario en sesión local y caché en memoria
   static Future<bool> saveUserSession(UserModel user) async {
+    _cachedUser = user;
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     return await prefs.setString(_userKey, jsonEncode(user.toJson()));
   }
 
-  // Obtener usuario actualmente autenticado
+  // Obtener usuario actualmente autenticado (Caché instantánea en memoria 0ms)
   static Future<UserModel?> getCurrentUser() async {
+    if (_cachedUser != null) {
+      return _cachedUser;
+    }
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userJson = prefs.getString(_userKey);
     if (userJson != null && userJson.isNotEmpty) {
       try {
-        return UserModel.fromJson(jsonDecode(userJson));
+        _cachedUser = UserModel.fromJson(jsonDecode(userJson));
+        return _cachedUser;
       } catch (_) {
         return null;
       }
@@ -377,6 +387,7 @@ class ApiService {
 
   // Cerrar sesión
   static Future<bool> logout() async {
+    _cachedUser = null;
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     return await prefs.remove(_userKey);
   }

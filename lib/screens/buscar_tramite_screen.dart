@@ -45,7 +45,8 @@ class _BuscarTramiteScreenState extends State<BuscarTramiteScreen> {
       _searchResults = [];
     });
 
-    final res = await ApiService.buscarTramites(query);
+    final currentUser = await ApiService.getCurrentUser();
+    final res = await ApiService.buscarTramites(query, solicitanteId: currentUser?.id);
 
     if (mounted) {
       setState(() {

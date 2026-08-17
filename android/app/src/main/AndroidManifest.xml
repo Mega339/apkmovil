@@ -16,7 +16,7 @@
     </queries>
 
     <application
-        android:label="CONTICOMTC"
+        android:label="SIS TRÁMITE"
         android:name="${applicationName}"
         android:usesCleartextTraffic="true">
         <activity

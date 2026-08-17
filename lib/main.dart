@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'CONTICOMTC Móvil',
+      title: 'SIS TRÁMITE',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,

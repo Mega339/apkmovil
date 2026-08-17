@@ -45,8 +45,13 @@ class _CrearTramiteScreenState extends State<CrearTramiteScreen> {
   }
 
   void _loadData() async {
-    final user = await ApiService.getCurrentUser();
-    final tiposResult = await ApiService.getTiposTramite();
+    final results = await Future.wait([
+      ApiService.getCurrentUser(),
+      ApiService.getTiposTramite(),
+    ]);
+
+    final user = results[0] as UserModel?;
+    final tiposResult = results[1] as Map<String, dynamic>;
 
     if (mounted) {
       setState(() {
